@@ -1,12 +1,15 @@
+// our framework
+#include "common.h"
+
+// OpenGL
 #include <GL/gl3w.h>
+
+// for textures
 #include <stb/stb_image.h>
-#include <cstdint>
 
-//! Aktuelle Zeit seit Start in Millisekunden
-extern uint32_t timer();
-
-//! Lädt eine Textdatei als nullterminierter String
-char const * loadtxt(char const * fileName);
+// for useful math (GLSL-like arithmetic in c++!)
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 void init()
 {

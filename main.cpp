@@ -5,9 +5,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-using namespace std;
-
-#define die(msg, ...) do { fprintf(stderr, "%s:%d: ", __FILE__, __LINE__); fprintf(stderr, msg, ##__VA_ARGS__); fprintf(stderr, "\n"); exit(EXIT_FAILURE); } while(false);
+#include "common.h"
 
 static SDL_Window * window;
 
@@ -46,7 +44,22 @@ char const * loadtxt(char const * fileName)
 	return data;
 }
 
-#include <unistd.h>
+static void APIENTRY debugCallback(GLenum source,GLenum type,GLuint id,GLenum severity,GLsizei length,const GLchar *message,const void *userParam)
+{
+	(void)source;
+	(void)type;
+	(void)id;
+	(void)userParam;
+
+	fprintf(stderr, "[OpenGL] ");
+	fwrite(message, size_t(length), 1, stderr);
+	fprintf(stderr, "\n");
+	fflush(stderr);
+
+	// Instantly kill the system when a high severity error happens
+	if(severity == GL_DEBUG_SEVERITY_HIGH)
+		exit(EXIT_FAILURE);
+}
 
 int main()
 {
@@ -75,6 +88,35 @@ int main()
 
 	if(gl3wInit() < 0)
 		die("Could not initialize gl3w!");
+
+	fprintf(stdout, "Version: %s\n", glGetString(GL_VERSION));
+	fprintf(stdout, "Vendor:  %s\n", glGetString(GL_VENDOR));
+	fprintf(stdout, "GLSL:    %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+	// Check against some extensions we require
+
+	int extcount = 0;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &extcount);
+
+	bool hasDSA = false;
+	bool hasLog = false;
+	for(unsigned int i = 0; i < size_t(extcount); i++)
+	{
+		char const * extension = reinterpret_cast<char const *>(glGetStringi(GL_EXTENSIONS, i));
+		hasDSA |= !strcmp(extension, "GL_ARB_direct_state_access");
+		hasLog |= !strcmp(extension, "GL_ARB_debug_output");
+	}
+	if(!hasDSA)
+		die("GL_ARB_direct_state_access required!");
+
+	if(hasLog)
+	{
+		glDebugMessageCallback(debugCallback, nullptr);
+	}
+	else
+	{
+		fprintf(stderr, "Warning: GL_ARB_debug_output not available, no errors or warnings will be logged!\n");
+	}
 
 	startup = SDL_GetTicks();
 

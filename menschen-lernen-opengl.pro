@@ -12,3 +12,10 @@ QMAKE_CXXFLAGS += $$system(pkg-config --cflags sdl2)
 QMAKE_LFLAGS   += $$system(pkg-config --libs sdl2)
 
 include($$quote($$PWD/gl3w/gl3w.pri))
+
+HEADERS += \
+    common.h
+
+DISTFILES += \
+    first.frag \
+    first.vert
