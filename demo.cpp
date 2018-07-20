@@ -5,6 +5,9 @@
 //! Aktuelle Zeit seit Start in Millisekunden
 extern uint32_t timer();
 
+//! Lädt eine Textdatei als nullterminierter String
+char const * loadtxt(char const * fileName);
+
 void init()
 {
 	glClearColor(0.0f, 0.0f, 0.5f, 1.0f);

@@ -9,9 +9,9 @@ using namespace std;
 
 #define die(msg, ...) do { fprintf(stderr, "%s:%d: ", __FILE__, __LINE__); fprintf(stderr, msg, ##__VA_ARGS__); fprintf(stderr, "\n"); exit(EXIT_FAILURE); } while(false);
 
-SDL_Window * window;
+static SDL_Window * window;
 
-SDL_GLContext context;
+static SDL_GLContext context;
 
 extern void init();
 
@@ -23,6 +23,30 @@ extern uint32_t timer()
 {
 	return SDL_GetTicks() - startup;
 }
+
+char const * loadtxt(char const * fileName)
+{
+	FILE * f = fopen(fileName, "r");
+	if(f == nullptr)
+		die("could not open file %s", fileName);
+
+	fseek(f, 0, SEEK_END);
+	size_t size = size_t(ftell(f));
+	fseek(f, 0, SEEK_SET);
+
+	char * data = reinterpret_cast<char*>(malloc(size + 1));
+	if(data == nullptr)
+		die("Could not allocate file storage for %s!", fileName);
+	memset(data, 0, size + 1);
+
+	size_t len = fread(data, 1, size, f);
+	if(len != size)
+		die("could not read file %s", fileName);
+	fclose(f);
+	return data;
+}
+
+#include <unistd.h>
 
 int main()
 {
